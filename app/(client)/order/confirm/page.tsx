@@ -79,7 +79,7 @@ if (!hasItems) return null
             { emoji: '📱', label: order.phone },
             { emoji: '📸', label: order.contactInfo },
           ].map(({ emoji, label }) => (
-            <div key={label} className="flex items-center gap-3">
+            <div key={emoji} className="flex items-center gap-3">
               <span className="text-base">{emoji}</span>
               <span className="text-sm font-medium text-[#6B2D0E]">{label}</span>
             </div>
