@@ -11,14 +11,23 @@ export const FLAVORS: Flavor[] = [
   { id: 'pizza', name: 'Pizza', extraCost: 0, isSpecial: true },
 ]
 
-// Precio por rol según categoría
-export const ROLL_PRICES = {
-  clasico: 1.00,   // Solo el clásico a $1
-  premium: 1.50,   // Oreo, Pistacho, Manjar, Choco Avellana, Frutos Rojos
-  especial: 2.00,  // Creme Brulee, Pizza
+export const FLAVOR_IMAGES: Record<string, string> = {
+  clasico: '/flavors/clasico.png',
+  oreo: '/flavors/oreo.png',
+  pistacho: '/flavors/pistacho.png',
+  manjar_nueces: '/flavors/manjar_nueces.png',
+  choco_avellana: '/flavors/choco_avellana.png',
+  frutos_rojos: '/flavors/frutos_rojos.png',
+  creme_brulee: '/flavors/creme_brulee.png',
+  pizza: '/flavors/pizza.png',
 }
 
-// Qué categoría es cada sabor
+export const ROLL_PRICES = {
+  clasico: 1.00,
+  premium: 1.50,
+  especial: 2.00,
+}
+
 export function getRollPrice(flavorId: string): number {
   if (['creme_brulee', 'pizza'].includes(flavorId)) return ROLL_PRICES.especial
   if (flavorId === 'clasico') return ROLL_PRICES.clasico
@@ -26,18 +35,18 @@ export function getRollPrice(flavorId: string): number {
 }
 
 export const PRICES = {
-  caja_4: 0,   // Se calcula por sabores
+  caja_4: 0,
   caja_6: 0,
   individual: 0,
 }
 
-export const CONTAINER_LABELS = {
+export const CONTAINER_LABELS: Record<string, string> = {
   caja_4: 'Caja x4',
   caja_6: 'Caja x6',
   individual: 'Individual',
 }
 
-export const CONTAINER_CAPACITY = {
+export const CONTAINER_CAPACITY: Record<string, number> = {
   caja_4: 4,
   caja_6: 6,
   individual: 1,
