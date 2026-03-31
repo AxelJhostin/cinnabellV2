@@ -1,5 +1,5 @@
 import { createServerSupabaseClient } from '@/lib/supabase/server'
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET() {
   try {
@@ -10,12 +10,10 @@ export async function GET() {
       .from('daily_config')
       .select('*')
       .gte('date', today)
-      .eq('is_open', true)
       .order('date', { ascending: true })
 
     if (error) throw error
 
-    // Mapear a camelCase para el frontend
     const mapped = data.map((d) => ({
       id: d.id,
       date: d.date,
@@ -30,5 +28,36 @@ export async function GET() {
     return NextResponse.json(mapped)
   } catch (error) {
     return NextResponse.json({ error: 'Error al obtener configuración' }, { status: 500 })
+  }
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    const body = await req.json()
+    const supabase = await createServerSupabaseClient()
+
+    console.log('Insertando:', body)
+
+    const { error } = await supabase
+      .from('daily_config')
+      .insert({
+        date: body.date,
+        day_of_week: body.dayOfWeek,
+        morning_available: body.morningAvailable ?? true,
+        afternoon_available: body.afternoonAvailable ?? true,
+        max_rolls: body.maxRolls ?? 50,
+        current_rolls: 0,
+        is_open: true,
+      })
+
+    if (error) {
+      console.error('Supabase error:', error)
+      throw error
+    }
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    console.error('POST config error:', error)
+    return NextResponse.json({ error: 'Error al crear día' }, { status: 500 })
   }
 }
