@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { CONTAINER_LABELS } from '@/constants/products'
 import { SHIFTS } from '@/constants/delivery'
+import { generateDayPDF } from '@/lib/pdf/generator'
 
 interface OrderItem {
   id: string
@@ -212,6 +213,10 @@ export default function DashboardPage() {
     }, 0)
   }
 
+  function handleExportPDF() {
+  generateDayPDF(filtered, activeDate)
+}
+
   return (
     <div className="flex flex-col min-h-screen">
 
@@ -251,29 +256,43 @@ export default function DashboardPage() {
 
       {/* Selector de fecha */}
       {tab !== 'stats' && tab !== 'config' && (
-        <div className="px-4 py-3 overflow-x-auto">
-          <div className="flex gap-2 w-max">
-            {dates.length === 0 ? (
-              <p className="text-xs text-[#C45C26]/60 py-2">No hay pedidos aún</p>
-            ) : dates.map((date) => (
-              <button
-                key={date}
-                onClick={() => setSelectedDate(date)}
-                className={`px-4 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition-all
-                  ${activeDate === date
-                    ? 'bg-[#C45C26] text-white shadow-md'
-                    : 'bg-white border border-[#C45C26]/20 text-[#6B2D0E]'
-                  }`}
-              >
-                {formatDate(date)}
-                <span className={`ml-1.5 px-1.5 py-0.5 rounded-full text-xs
-                  ${activeDate === date ? 'bg-white/20 text-white' : 'bg-[#C45C26]/10 text-[#C45C26]'}`}>
-                  {orders.filter((o) => o.delivery_date === date).length}
-                </span>
-              </button>
-            ))}
+        <>
+          <div className="px-4 py-3 overflow-x-auto">
+            <div className="flex gap-2 w-max">
+              {dates.length === 0 ? (
+                <p className="text-xs text-[#C45C26]/60 py-2">No hay pedidos aún</p>
+              ) : dates.map((date) => (
+                <button
+                  key={date}
+                  onClick={() => setSelectedDate(date)}
+                  className={`px-4 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition-all
+                    ${activeDate === date
+                      ? 'bg-[#C45C26] text-white shadow-md'
+                      : 'bg-white border border-[#C45C26]/20 text-[#6B2D0E]'
+                    }`}
+                >
+                  {formatDate(date)}
+                  <span className={`ml-1.5 px-1.5 py-0.5 rounded-full text-xs
+                    ${activeDate === date ? 'bg-white/20 text-white' : 'bg-[#C45C26]/10 text-[#C45C26]'}`}>
+                    {orders.filter((o) => o.delivery_date === date).length}
+                  </span>
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+
+          {tab === 'pedidos' && filtered.length > 0 && (
+            <div className="px-4 pb-2">
+              <button
+                onClick={handleExportPDF}
+                className="w-full bg-white border-2 border-[#C45C26]/30 text-[#C45C26] font-bold py-2.5 rounded-2xl text-sm flex items-center justify-center gap-2 active:scale-95 transition-all hover:border-[#C45C26]"
+              >
+                <span>🖨️</span>
+                <span>Exportar PDF del día</span>
+              </button>
+            </div>
+          )}
+        </>
       )}
 
       <div className="flex-1 px-4 pb-6 space-y-3">
