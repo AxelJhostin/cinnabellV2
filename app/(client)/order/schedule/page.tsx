@@ -4,15 +4,32 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { WizardLayout } from '@/components/shared/WizardLayout'
 import { useOrderStore } from '@/stores/orderStore'
-import { DailyConfig, Shift } from '@/types'
-import { SHIFTS } from '@/constants/delivery'
+import { Shift } from '@/types'
+import { TIME_SLOTS } from '@/constants/delivery'
+
+interface SlotInfo {
+  max: number
+  current: number
+}
+
+interface DailyConfig {
+  id: string
+  date: string
+  dayOfWeek: string
+  morningAvailable: boolean
+  afternoonAvailable: boolean
+  maxRolls: number
+  currentRolls: number
+  isOpen: boolean
+  slots: Record<string, SlotInfo>
+}
 
 export default function SchedulePage() {
   const router = useRouter()
   const { setDelivery, setStep } = useOrderStore()
   const [configs, setConfigs] = useState<DailyConfig[]>([])
   const [selectedDate, setSelectedDate] = useState<string>('')
-  const [selectedShift, setSelectedShift] = useState<Shift | ''>('')
+  const [selectedSlot, setSelectedSlot] = useState<Shift | ''>('')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -26,21 +43,21 @@ export default function SchedulePage() {
 
   const selectedConfig = configs.find((c) => c.date === selectedDate)
 
-  const availableShifts = selectedConfig
-    ? [
-        ...(selectedConfig.morningAvailable
-          ? [{ key: 'manana' as Shift, label: SHIFTS.manana, emoji: '🌅' }]
-          : []),
-        ...(selectedConfig.afternoonAvailable
-          ? [{ key: 'tarde' as Shift, label: SHIFTS.tarde, emoji: '🌇' }]
-          : []),
-        { key: 'acordar' as Shift, label: SHIFTS.acordar, emoji: '💬' },
-      ]
-    : []
+  const col1 = TIME_SLOTS.filter((s) => s.column === 1)
+  const col2 = TIME_SLOTS.filter((s) => s.column === 2)
+
+  function getSlotInfo(key: string): SlotInfo {
+    return selectedConfig?.slots?.[key] ?? { max: 0, current: 0 }
+  }
+
+  function isSlotFull(key: string): boolean {
+    const slot = getSlotInfo(key)
+    return slot.current >= slot.max
+  }
 
   function handleContinue() {
-    if (!selectedDate || !selectedShift) return
-    setDelivery(selectedDate, selectedShift as Shift)
+    if (!selectedDate || !selectedSlot) return
+    setDelivery(selectedDate, selectedSlot as Shift)
     setStep(2)
     router.push('/order/type')
   }
@@ -55,10 +72,15 @@ export default function SchedulePage() {
   }
 
   function getDayEmoji(dayOfWeek: string) {
-    const map: Record<string, string> = {
-      lunes: '🌱', miércoles: '✨', sábado: '🎉'
-    }
-    return map[dayOfWeek] ?? '📅'
+    const lower = dayOfWeek?.toLowerCase() ?? ''
+    if (lower.includes('lunes')) return '🌱'
+    if (lower.includes('mi')) return '✨'
+    if (lower.includes('s')) return '🎉'
+    return '📅'
+  }
+
+  const isDateFull = (config: DailyConfig) => {
+    return config.currentRolls >= config.maxRolls
   }
 
   return (
@@ -70,7 +92,7 @@ export default function SchedulePage() {
     >
       <div className="space-y-8">
 
-        {/* Sección fecha */}
+        {/* Selección de fecha */}
         <div>
           <p className="text-base font-bold text-[#6B2D0E] mb-1">
             Elige el día de entrega
@@ -98,9 +120,8 @@ export default function SchedulePage() {
           ) : (
             <div className="space-y-3">
               {configs.map((config) => {
-                const spots = config.maxRolls - config.currentRolls
                 const isSelected = selectedDate === config.date
-                const isFull = spots <= 0
+                const isFull = isDateFull(config)
 
                 return (
                   <button
@@ -108,7 +129,7 @@ export default function SchedulePage() {
                     disabled={isFull}
                     onClick={() => {
                       setSelectedDate(config.date)
-                      setSelectedShift('')
+                      setSelectedSlot('')
                     }}
                     className={`w-full flex items-center justify-between px-5 py-4 rounded-2xl border-2 transition-all duration-200 text-left active:scale-95
                       ${isSelected
@@ -126,15 +147,11 @@ export default function SchedulePage() {
                         {formatDate(config.date)}
                       </span>
                     </div>
-                    <span className={`text-xs font-bold px-3 py-1 rounded-full
-                      ${isSelected
-                        ? 'bg-white/20 text-white'
-                        : isFull
-                        ? 'bg-gray-200 text-gray-500'
-                        : 'bg-[#C45C26]/10 text-[#C45C26]'
-                      }`}>
-                      {isFull ? 'Lleno' : `${spots} roles`}
-                    </span>
+                    {isFull && (
+                      <span className="text-xs font-bold px-3 py-1 rounded-full bg-gray-200 text-gray-500">
+                        Sin disponibilidad
+                      </span>
+                    )}
                   </button>
                 )
               })}
@@ -142,37 +159,57 @@ export default function SchedulePage() {
           )}
         </div>
 
-        {/* Sección turno */}
+        {/* Selección de horario */}
         {selectedDate && (
           <div className="animate-in slide-in-from-bottom-4 duration-300">
             <p className="text-base font-bold text-[#6B2D0E] mb-1">
-              ¿En qué turno?
+              ¿A qué hora lo recoges?
             </p>
             <p className="text-xs text-[#C45C26]/70 mb-4">
-              Elige el horario que más te convenga
+              Los horarios en gris ya no tienen disponibilidad
             </p>
-            <div className="space-y-3">
-              {availableShifts.map(({ key, label, emoji }) => (
-                <button
-                  key={key}
-                  onClick={() => setSelectedShift(key)}
-                  className={`w-full flex items-center gap-3 px-5 py-4 rounded-2xl border-2 transition-all duration-200 text-left active:scale-95
-                    ${selectedShift === key
-                      ? 'border-[#C45C26] bg-[#C45C26] text-white shadow-md'
-                      : 'border-[#C45C26]/25 bg-white text-[#6B2D0E] hover:border-[#C45C26]/60'
-                    }`}
-                >
-                  <span className="text-2xl">{emoji}</span>
-                  <span className="font-bold text-sm">{label}</span>
-                </button>
-              ))}
+
+            <div className="grid grid-cols-2 gap-2">
+              {TIME_SLOTS.map(({ key, label }) => {
+                const full = isSlotFull(key)
+                const selected = selectedSlot === key
+                return (
+                  <button
+                    key={key}
+                    disabled={full}
+                    onClick={() => setSelectedSlot(key as Shift)}
+                    className={`w-full py-3 rounded-2xl border-2 font-bold text-sm transition-all duration-200 active:scale-95
+                      ${selected
+                        ? 'border-[#C45C26] bg-[#C45C26] text-white shadow-md'
+                        : full
+                        ? 'border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed line-through'
+                        : 'border-[#C45C26]/25 bg-white text-[#6B2D0E] hover:border-[#C45C26]/60'
+                      }`}
+                  >
+                    {label}
+                  </button>
+                )
+              })}
             </div>
+
+            {/* Acordar */}
+            <button
+              onClick={() => setSelectedSlot('acordar')}
+              className={`w-full flex items-center gap-3 px-5 py-4 rounded-2xl border-2 transition-all duration-200 text-left active:scale-95 mt-2
+                ${selectedSlot === 'acordar'
+                  ? 'border-[#C45C26] bg-[#C45C26] text-white shadow-md'
+                  : 'border-[#C45C26]/25 bg-white text-[#6B2D0E] hover:border-[#C45C26]/60'
+                }`}
+            >
+              <span className="text-2xl">💬</span>
+              <span className="font-bold text-sm">Prefiero elegir otro horario</span>
+            </button>
           </div>
         )}
 
         {/* Botón continuar */}
         <button
-          disabled={!selectedDate || !selectedShift}
+          disabled={!selectedDate || !selectedSlot}
           onClick={handleContinue}
           className="w-full bg-[#C45C26] hover:bg-[#A34820] disabled:bg-[#C45C26]/20 disabled:text-[#C45C26]/40 text-white font-bold py-4 rounded-full text-base transition-all duration-200 active:scale-95 shadow-md disabled:shadow-none"
         >

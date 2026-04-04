@@ -24,12 +24,10 @@ export default function SplashPage() {
         className={`flex flex-col items-center text-center transition-all duration-700 ease-out
           ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
       >
-        {/* Logo */}
         <div className="relative mb-6">
           <div className="w-32 h-32 rounded-full bg-[#C45C26] flex items-center justify-center shadow-xl">
             <span className="text-6xl">🥐</span>
           </div>
-          {/* Destellos */}
           <span className="absolute -top-1 -right-1 text-xl animate-bounce">✨</span>
           <span className="absolute -bottom-1 -left-2 text-lg animate-pulse">⭐</span>
         </div>
@@ -41,7 +39,6 @@ export default function SplashPage() {
           Roles de canela & más
         </p>
 
-        {/* Chips decorativos */}
         <div className="flex gap-2 flex-wrap justify-center mb-8">
           {['🍂 Artesanales', '❤️ Con amor', '🎁 Para ti'].map((tag) => (
             <span
@@ -58,7 +55,7 @@ export default function SplashPage() {
         </p>
       </div>
 
-      {/* Botón */}
+      {/* Botones */}
       <div
         className={`w-full flex flex-col items-center gap-3 transition-all duration-700 delay-300 ease-out
           ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'}`}
@@ -69,7 +66,28 @@ export default function SplashPage() {
         >
           Hacer mi pedido 🥐
         </button>
-        <p className="text-[#C45C26]/60 text-xs font-medium">
+
+          <a
+          href="https://www.instagram.com/cinnabell_ec/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-full max-w-xs bg-white border-2 border-[#C45C26]/30 hover:border-[#C45C26] active:scale-95 text-[#6B2D0E] font-bold py-3.5 px-8 rounded-full text-base shadow-sm transition-all duration-200 flex items-center justify-center gap-2"
+        >
+          <span>📸</span>
+          <span>Instagram</span>
+        </a>
+
+          <a
+          href="https://www.tiktok.com/@cinnabell_ec"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="w-full max-w-xs bg-white border-2 border-[#C45C26]/30 hover:border-[#C45C26] active:scale-95 text-[#6B2D0E] font-bold py-3.5 px-8 rounded-full text-base shadow-sm transition-all duration-200 flex items-center justify-center gap-2"
+        >
+          <span>🎵</span>
+          <span>TikTok</span>
+        </a>
+
+        <p className="text-[#C45C26]/60 text-xs font-medium mt-1">
           Sin cuenta · Sin complicaciones
         </p>
       </div>

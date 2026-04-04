@@ -23,6 +23,7 @@ export async function GET() {
       maxRolls: d.max_rolls,
       currentRolls: d.current_rolls,
       isOpen: d.is_open,
+      slots: d.slots ?? {},
     }))
 
     return NextResponse.json(mapped)
@@ -36,7 +37,19 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const supabase = await createServerSupabaseClient()
 
-    console.log('Insertando:', body)
+    const perSlot = Math.max(1, Math.floor((body.maxRolls ?? 50) / 10))
+    const slots = {
+      '12:00': { max: perSlot, current: 0 },
+      '12:30': { max: perSlot, current: 0 },
+      '13:00': { max: perSlot, current: 0 },
+      '13:30': { max: perSlot, current: 0 },
+      '15:00': { max: perSlot, current: 0 },
+      '15:30': { max: perSlot, current: 0 },
+      '16:00': { max: perSlot, current: 0 },
+      '16:30': { max: perSlot, current: 0 },
+      '17:00': { max: perSlot, current: 0 },
+      '17:30': { max: perSlot, current: 0 },
+    }
 
     const { error } = await supabase
       .from('daily_config')
@@ -48,16 +61,14 @@ export async function POST(req: NextRequest) {
         max_rolls: body.maxRolls ?? 50,
         current_rolls: 0,
         is_open: true,
+        slots,
       })
 
-    if (error) {
-      console.error('Supabase error:', error)
-      throw error
-    }
+    if (error) throw error
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error('POST config error:', error)
+    console.error(error)
     return NextResponse.json({ error: 'Error al crear día' }, { status: 500 })
   }
 }

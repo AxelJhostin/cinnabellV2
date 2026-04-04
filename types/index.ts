@@ -2,7 +2,7 @@ export type ContainerType = 'caja_4' | 'caja_6' | 'individual'
 export type DeliveryType = 'retiro' | 'envio'
 export type PaymentMethod = 'efectivo' | 'transferencia'
 export type OrderStatus = 'pendiente' | 'confirmado' | 'listo' | 'entregado'
-export type Shift = 'manana' | 'tarde' | 'acordar'
+export type Shift = '12:00' | '12:30' | '13:00' | '13:30' | '15:00' | '15:30' | '16:00' | '16:30' | '17:00' | '17:30' | 'acordar'
 
 export interface Flavor {
   id: string

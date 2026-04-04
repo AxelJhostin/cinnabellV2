@@ -55,8 +55,9 @@ export async function POST(req: NextRequest) {
       return acc + (item.quantity * capacity)
     }, 0)
 
-    await supabase.rpc('increment_rolls', {
+    await supabase.rpc('increment_slot', {
       p_date: body.deliveryDate,
+      p_slot: body.deliveryShift,
       p_amount: totalRolls,
     })
 
