@@ -16,8 +16,7 @@ export default function CustomerPage() {
 
   const canContinue =
     name.trim().length > 0 &&
-    phone.length === 10 &&
-    contact.trim().length > 0
+    phone.length === 10
 
   function handleContinue() {
     if (!canContinue) return
@@ -91,7 +90,8 @@ export default function CustomerPage() {
             {/* Instagram o correo */}
             <div>
               <label className="text-xs font-bold text-[#8B4513] uppercase tracking-wide mb-1.5 block">
-                Instagram o correo *
+                Instagram o correo
+                <span className="text-[#C45C26]/40 font-normal ml-1">(opcional)</span>
               </label>
               <div className="relative">
                 <span className="absolute left-4 top-1/2 -translate-y-1/2 text-lg">📸</span>
