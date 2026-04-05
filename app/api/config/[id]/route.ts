@@ -27,3 +27,26 @@ export async function PATCH(
     return NextResponse.json({ error: 'Error al actualizar configuración' }, { status: 500 })
   }
 }
+
+export async function PUT(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params
+    const body = await req.json()
+    const supabase = await createServerSupabaseClient()
+
+    const { error } = await supabase.rpc('update_slot_max', {
+      p_id: id,
+      p_slot: body.slot,
+      p_max: body.max,
+    })
+
+    if (error) throw error
+
+    return NextResponse.json({ success: true })
+  } catch (error) {
+    return NextResponse.json({ error: 'Error al actualizar slot' }, { status: 500 })
+  }
+}
